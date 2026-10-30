@@ -6,6 +6,9 @@ on:
 
 env:
   USE_LIBUV: 0
+  # one intra-op thread per xdist worker: -n auto already uses every core
+  OMP_NUM_THREADS: 1
+  MKL_NUM_THREADS: 1
 
 jobs:
   test:

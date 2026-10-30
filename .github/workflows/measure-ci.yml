@@ -6,6 +6,9 @@ on:
 
 env:
   USE_LIBUV: 0
+  # arm 3 (OMP-only control): thread cap without xdist
+  OMP_NUM_THREADS: 1
+  MKL_NUM_THREADS: 1
 
 jobs:
   test:

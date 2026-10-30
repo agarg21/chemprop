@@ -8,6 +8,14 @@ import pytest
 from chemprop.featurizers.molgraph import CGRFeaturizer, RxnMode
 from chemprop.utils import make_mol
 
+# fixed seed: pytest-xdist workers must collect identical param IDs
+_UUID_RNG = random.Random(0)
+
+
+def _seeded_uuid() -> str:
+    return str(uuid.UUID(int=_UUID_RNG.getrandbits(128), version=4))
+
+
 AVAILABLE_RXN_MODE_NAMES = [
     "REAC_PROD",
     "REAC_PROD_BALANCE",
@@ -43,7 +51,7 @@ def rxn_mode(mode_name):
     return getattr(RxnMode, mode_name)
 
 
-@pytest.fixture(params=[str(uuid.uuid4()) for _ in range(3)])
+@pytest.fixture(params=[_seeded_uuid() for _ in range(3)])
 def invalid_alias(request):
     return request.param
 
@@ -148,7 +156,7 @@ def randomize_case(s: str) -> str:
     return "".join(random.choice(choices)(x) for x in s)
 
 
-@pytest.mark.parametrize("s", [str(uuid.uuid4()) for _ in range(3)])
+@pytest.mark.parametrize("s", [_seeded_uuid() for _ in range(3)])
 def test_randomize_case(s):
     """test our helper function to ensure that it's not mangling our strings"""
     assert randomize_case(s).upper() == s.upper()

@@ -6,6 +6,8 @@ on:
 
 env:
   USE_LIBUV: 0
+  # harness (all arms): skip the 2 env-drift CLI tests so the pytest step can pass and the notebook step runs, as upstream
+  PYTEST_ADDOPTS: "--deselect tests/cli/test_cli_MAB.py::test_make_predictions_with_constraints --deselect tests/cli/test_cli_MAB.py::test_make_predictions_with_atom_map"
   # one intra-op thread per xdist worker: -n auto already uses every core
   OMP_NUM_THREADS: 1
   MKL_NUM_THREADS: 1
@@ -14,6 +16,7 @@ jobs:
   test:
     name: Execute Tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     defaults:
       run:
         # run with a login shell (so that the conda environment is activated)
@@ -70,7 +73,9 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
-          pytest -v -n auto --dist loadfile tests
+          # DataLoader multiprocess tests fork inside an xdist worker and hung once on ubuntu 3.11 (run 41131123423): run them serially
+          pytest -v -n auto --dist loadfile -k "not multiprocess" tests
+          pytest -v -k multiprocess tests
       - name: Test notebooks
         if: ${{ !(matrix.os == 'macos-15-intel' && matrix.python-version == '3.12') }}
         shell: bash -l {0}

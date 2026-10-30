@@ -83,12 +83,12 @@ def targets(smis):
 #     return [ReactionDatapoint(mol, y) for mol, y in zip(mols, targets)]
 
 
-@pytest.fixture(params=_DF.smi.sample(5))
+@pytest.fixture(params=_DF.smi.sample(5, random_state=0))
 def smi(request):
     return request.param
 
 
-@pytest.fixture(params=_DF.mol.sample(5))
+@pytest.fixture(params=_DF.mol.sample(5, random_state=0))
 def mol(request):
     return request.param
 
